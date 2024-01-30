@@ -41,7 +41,7 @@ services:
     networks:
       - roboshop
   web:
-    image: joindevops/web:v1
+    image: web:v1
     container_name: web
     networks:
     - roboshop
