@@ -1,12 +1,21 @@
 networks:
   roboshop:
     driver: bridge
+volumes:
+  mongodb:
+  redis:
+  mysql:
+  rabbitmq:
 services:
   mongodb:
     image: jmvasanth/mongodb:v1
     container_name: mongodb
     networks:
       - roboshop
+    volumes:
+    - source: mongodb
+      target: /data/db
+      type: volume
   catalogue:
     image: jmvasanth/catalogue:v1
     container_name: catalogue
@@ -19,40 +28,52 @@ services:
     container_name: redis
     networks:
       - roboshop
+    volumes:
+    - source: redis
+      target: /data
+      type: volume
   user:
     image: jmvasanth/user:v1
     container_name: user
     networks:
-    - roboshop
+      - roboshop
     depends_on:
-    - mongodb
-    - redis
+      - mongodb
+      - redis
   cart:
     image: jmvasanth/cart:v1
     container_name: cart
     networks:
-    - roboshop
+      - roboshop
     depends_on:
-    - redis
-    - catalogue
+      - redis
+      - catalogue
   mysql:
     image: jmvasanth/mysql:v1
     container_name: mysql
     networks:
       - roboshop
+    volumes:
+    - source: mysql
+      target: /var/lib/mysql
+      type: volume
   shipping:
     image: jmvasanth/shipping:v1
     container_name: shipping
     networks:
-    - roboshop
+      - roboshop
     depends_on:
-    - cart
-    - mysql
+      - cart
+      - mysql
   rabbitmq:
     image: rabbitmq
     container_name: rabbitmq
     networks:
-    - roboshop
+      - roboshop
+    volumes:
+    - source: rabbitmq
+      target: /var/lib/rabbitmq
+      type: volume
     environment:
     - RABBITMQ_DEFAULT_USER=roboshop
     - RABBITMQ_DEFAULT_PASS=roboshop123
@@ -60,11 +81,11 @@ services:
     image: jmvasanth/payment:v1
     container_name: payment
     networks:
-    - roboshop
+      - roboshop
     depends_on:
-    - cart
-    - user
-    - rabbitmq
+      - cart
+      - user
+      - rabbitmq
   web:
     image: jmvasanth/web:v1
     container_name: web
@@ -76,4 +97,5 @@ services:
     - catalogue
     - user
     - cart
-
+    - shipping
+    - payment
